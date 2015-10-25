@@ -1,2 +1,5 @@
+0.011 2015-10-25
+  * Workaround for perllocal omissions.
+
 0.001 2015-10-24
   * Initial stab.
