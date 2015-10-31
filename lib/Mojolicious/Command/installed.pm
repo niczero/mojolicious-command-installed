@@ -1,7 +1,7 @@
 package Mojolicious::Command::installed;
 use Mojolicious::Commands -base;
 
-our $VERSION = 0.011;
+our $VERSION = 0.021;
 
 use Cwd 'abs_path';
 use File::Find;
@@ -80,14 +80,17 @@ sub run {
   }
 
   # Output
+  my $out = '';
   for my $module (sort keys %meta) {
     my $entry = $meta{$module};
     my $line = $entry->{name};
     $line .= '@'. $entry->{version}
       if $show_versions and defined $entry->{version};
     $line .= '	# '. $entry->{path} if $show_paths;
-    say $line;
+    $out .= $line ."\n";
   }
+  print($out) unless $self->quiet;
+  return $out;
 }
 
 sub _file_for {
@@ -133,3 +136,28 @@ a difficult-to-parse way (eg
 L<https://metacpan.org/source/MIKO/String-Util-1.24/Makefile.PL>).  This should
 not matter as long as they deposit at least one JSON installation file under
 .meta.
+
+The output will only prove useful if you invoke it using the same C<PERL5LIB> as
+that used by your code so that the resulting C<@INC> is the same.
+
+The output is in dictionary order; listing them in dependency order is beyond my
+current time limits.
+
+=head1 RATIONALE
+
+Managing installations via App::cpanminus is wonderful -- it makes the important
+task of managing per-project dependencies a breeze.  But as far as I can tell
+there is no easy means to list what is currently installed.  Anyway, for an app,
+you want the app to tell you, so that it uses any configured path setup.
+
+I periodically replace and rebuild each project's dependencies dir by piping
+this command into cpanm.  The C<--show-versions> option is intended to make
+creation of 'cpanfile' easier, and the C<--show-paths> option is intended to
+make some debugging puzzles easier.
+
+=head1 COPYRIGHT AND LICENCE
+
+Copyright (c) 2015 Nic Sandfield.  All rights reserved.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the Artistic License version 2.0.
